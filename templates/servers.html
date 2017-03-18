@@ -1,0 +1,294 @@
+{% extends "base.html" %}{% load i18n %}{% load staticfiles %}<!DOCTYPE html>
+{% block content %}
+    <div class="row">
+        <div id="content" class="col-lg-12">
+            <!-- PAGE HEADER-->
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="page-header">
+                        <!-- STYLER -->
+
+                        <!-- /STYLER -->
+                        <!-- BREADCRUMBS -->
+                        <ul class="breadcrumb">
+                            <li>
+                                <i class="fa fa-home"></i>
+                                <a href="#">Home</a>
+                            </li>
+                            <li>
+                                <a href="#">Tables</a>
+                            </li>
+                            <li>Server Tables</li>
+                        </ul>
+                        <!-- /BREADCRUMBS -->
+                        <div class="clearfix">
+                            <h3 class="content-title pull-left">Server Tables</h3>
+                            <a data-toggle="modal" href="#addHost"
+                               class="btn btn-sm btn-success pull-right">{% trans "Add Connection" %}</a>
+                        </div>
+                        <div class="description">Simple Tables with exclusive UI experience</div>
+
+                    </div>
+
+                </div>
+            </div>
+            <!-- /PAGE HEADER -->
+            <!-- Table One -->
+            {% if hosts_info %}
+                {% for host in hosts_info %}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <!-- BOX -->
+                            <div class="box border dark">
+                                <div class="box-title">
+                                    <h4><i class="fa fa-hdd-o"></i>{{ host.name }}</h4>
+                                    <div class="tools">
+                                        <a href="#box-config" data-toggle="modal" class="config">
+                                            <i class="fa fa-cog"></i>
+                                        </a>
+                                        <a href="javascript:;" class="reload">
+                                            <i class="fa fa-refresh"></i>
+                                        </a>
+                                        <a href="javascript:;" class="collapse">
+                                            <i class="fa fa-chevron-up"></i>
+                                        </a>
+                                        <a href="javascript:;" class="remove">
+                                            <i class="fa fa-times"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                {% if host.instances %}
+                                    <div class="box-body">
+                                        <table class="table">
+                                            <thead>
+                                            <tr>
+                                                <th >#</th>
+                                                <th >Name</th>
+                                                <th >Status</th>
+                                                <th >VCPUS</th>
+                                                <th >RAM</th>
+                                                <th style="width:252px;">Actions</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for instance in host.instances %}
+                                                <tr>
+                                                    <td>1</td>
+                                                    <td><a href="#">{{ instance.name  }}</a></td>
+                                                    <td>{% ifequal instance.status 1 %}
+                                                        <span class="label label-success">{% trans "Running" %}
+                                                </span>{% endifequal %}
+                                                        {% ifequal instance.status 3 %}
+                                                            <span class="label label-warning">{% trans "Suspend" %}
+                                                </span>{% endifequal %}
+                                                        {% ifequal instance.status 5 %}
+                                                            <span class="label label-danger">{% trans "Shutoff" %}
+                                                </span>{% endifequal %}
+                                                    </td>
+                                                    <td>{{ instance.vcpu }}</td>
+                                                    <td>{{ instance.memory }}</td>
+                                                    <td>
+                                                        <form action=""  role="form">{% csrf_token %}
+                                                            <input type="hidden" name="name" value="{{ instance.name }}"/>
+                                                            {% ifequal instance.status 5 %}
+                                                                <button class="btn btn-sm btn-default" type="submit" name="start" title="Start">
+                                                                    <span class="glyphicon glyphicon-play"></span>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-default disabled" title="{% trans "Suspend" %}">
+                                                                    <span class="glyphicon glyphicon-pause"></span>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-default disabled" title="{% trans "Save" %}">
+                                                                    <span class="glyphicon glyphicon-download-alt"></span>
+                                                                </button>
+                                                                {% ifequal instance.has_managed_save_image 1 %}
+                                                                    <button class="btn btn-sm btn-default" type="submit" name="deletesaveimage"
+                                                                            title="{% trans "Delete Save Image" %}">
+                                                                        <span class="glyphicon glyphicon-remove"></span>
+                                                                    </button>
+                                                                {% else %}
+                                                                    <button class="btn btn-sm btn-default disabled" title="{% trans "Shutdown" %}">
+                                                                        <span class="glyphicon glyphicon-off"></span>
+                                                                    </button>
+                                                                {% endifequal %}
+                                                                <button class="btn btn-sm btn-default disabled"
+                                                                        title="{% trans "Force Shutdown" %}">
+                                                                    <span class="glyphicon glyphicon-stop"></span>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-default disabled" title="{% trans "Console" %}">
+                                                                    <span class="glyphicon glyphicon-align-justify"></span>
+                                                                </button>
+                                                            {% endifequal %}
+                                                            {% ifequal instance.status 3 %}
+                                                                <button class="btn btn-sm btn-default" type="submit" name="resume"
+                                                                        title="{% trans "Resume" %}">
+                                                                    <span class="glyphicon glyphicon-play"></span>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-default disabled" title="{% trans "Suspend" %}">
+                                                                    <span class="glyphicon glyphicon-pause"></span>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-default" type="submit" name="managedsave"
+                                                                        title="{% trans "Save" %}">
+                                                                    <span class="glyphicon glyphicon-download-alt"></span>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-default disabled" title="{% trans "Shutdown" %}">
+                                                                    <span class="glyphicon glyphicon-off"></span>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-default disabled"
+                                                                        title="{% trans "Force Shutdown" %}">
+                                                                    <span class="glyphicon glyphicon-stop"></span>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-default disabled" title="{% trans "Console" %}">
+                                                                    <span class="glyphicon glyphicon-align-justify"></span>
+                                                                </button>
+                                                            {% endifequal %}
+                                                            {% ifequal instance.status 1 %}
+                                                                <button class="btn btn-sm btn-default disabled" title="{% trans "Start" %}">
+                                                                    <span class="glyphicon glyphicon-play"></span>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-default" type="submit" name="suspend"
+                                                                        title="{% trans "Suspend" %}">
+                                                                    <span class="glyphicon glyphicon-pause"></span>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-default" type="submit" name="managedsave"
+                                                                        title="{% trans "Save" %}">
+                                                                    <span class="glyphicon glyphicon-download-alt"></span>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-default" type="submit" name="shutdown"
+                                                                        title="{% trans "Shutdown" %}">
+                                                                    <span class="glyphicon glyphicon-off"></span>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-default" type="submit" name="destroy"
+                                                                        title="{% trans "Force Shutdown" %}"
+                                                                        onclick="return confirm('Are you sure?')">
+                                                                    <span class="glyphicon glyphicon-stop"></span>
+                                                                </button>
+                                                                <a href="#" class="btn btn-sm btn-default"
+                                                                    title="{% trans "Console" %}">
+                                                                    <span class="glyphicon glyphicon-align-justify"></span>
+                                                                </a>
+                                                            {% endifequal %}
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <div class="well">
+                                        <h4>{% trans "You do not have any Instances" %}</h4>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <!-- /BOX -->
+                        </div>
+
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="well">
+                    <h4>{% trans "You do not have any Servers" %}</h4>
+                </div>
+            {% endif %}
+        </div>
+        <div class="footer-tools">
+							<span class="go-top">
+								<i class="fa fa-chevron-up"></i> Top
+							</span>
+        </div>
+    </div><!-- /CONTENT-->
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="addHost" tabindex="-1" role="dialog" aria-labelledby="addHostLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">{% trans "Add Connection" %}</h4>
+                </div>
+                <div class="tabbable">
+                    <ul class="nav nav-tabs">
+                        <li><a href="#2" data-toggle="tab">{% trans "SSH Connections" %}</a></li>
+                    </ul>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane-active" id="2">
+                        <form class="form-horizontal" method="post" role="form">{% csrf_token %}
+                            <p class="modal-body">{% trans "You must create ssh <a href='https://github.com/retspen/webvirtmgr/wiki/Setup-SSH-Authorization'>authorization key</a>. If you have another SSH port on your server, you can add IP:PORT like '192.168.1.1:2222'." %}</p>
+
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{% trans "Label" %}</label>
+
+                                <div class="col-sm-6">
+                                    <input type="text" name="name" class="form-control" placeholder="Label Name"
+                                           maxlength="20" required pattern="[a-z0-9\.\-_]+">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{% trans "FQDN / IP" %}</label>
+
+                                <div class="col-sm-6">
+                                    <input type="text" name="hostname" class="form-control"
+                                           placeholder="{% trans "FQDN or IP Address" %}" required
+                                           pattern="[a-z0-9\:\.\-_]+">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{% trans "Username" %}</label>
+
+                                <div class="col-sm-6">
+                                    <input type="text" name="login" class="form-control"
+                                           placeholder="{% trans "Username" %}">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default"
+                                        data-dismiss="modal">{% trans "Close" %}</button>
+                                <button type="submit" class="btn btn-primary"
+                                        name="host_ssh_add">{% trans "Add" %}</button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+
+
+{% endblock %}
+{% block script %}
+    <script src="{% static "js/jquery/jquery-2.0.3.min.js" %}"></script>
+    <!-- JQUERY UI-->
+    <script src="{% static "js/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js" %}"></script>
+    <!-- BOOTSTRAP -->
+    <script src="{% static "bootstrap-dist/js/bootstrap.min.js" %}"></script>
+
+
+    <!-- DATE RANGE PICKER -->
+    <script src="{% static "js/bootstrap-daterangepicker/moment.min.js" %}"></script>
+
+    <script src="{% static "js/bootstrap-daterangepicker/daterangepicker.min.js" %}"></script>
+    <!-- SLIMSCROLL -->
+    <script type="text/javascript" src="{% static "js/jQuery-slimScroll-1.3.0/jquery.slimscroll.min.js" %}"></script><script type="text/javascript" src="{% static "js/jQuery-slimScroll-1.3.0/slimScrollHorizontal.min.js" %}"></script>
+    <!-- BLOCK UI -->
+    <script type="text/javascript" src="{% static "js/jQuery-BlockUI/jquery.blockUI.min.js" %}"></script>
+    <!-- TABLE CLOTH -->
+    <script type="text/javascript" src="{% static "js/tablecloth/js/jquery.tablecloth.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/tablecloth/js/jquery.tablesorter.min.js" %}"></script>
+    <!-- COOKIE -->
+    <script type="text/javascript" src="{% static "js/jQuery-Cookie/jquery.cookie.min.js" %}"></script>
+    <!-- CUSTOM SCRIPT -->
+    <script src="{% static "js/script.js" %}"></script>
+    <script>
+        jQuery(document).ready(function() {
+            App.setPage("simple_table");  //Set current page
+            App.init(); //Initialise plugins and elements
+        });
+    </script>
+{% endblock %}
